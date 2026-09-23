@@ -1,0 +1,2 @@
+# Dependencias del proyecto gestor de tareas
+pytest>=7.0.0

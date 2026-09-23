@@ -1,0 +1,18 @@
+{
+  "tareas": [
+    {
+      "id": 1,
+      "titulo": "Test Alpha",
+      "completa": false,
+      "creado": "2026-09-23T14:51:37.221742"
+    },
+    {
+      "id": 2,
+      "titulo": "Test Beta",
+      "completa": true,
+      "creado": "2026-09-23T14:51:37.221981",
+      "actualizada": "2026-09-23T14:51:37.222438"
+    }
+  ],
+  "ultima_actualizacion": "2026-09-23T14:51:37.222681"
+}
