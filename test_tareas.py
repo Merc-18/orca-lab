@@ -168,6 +168,55 @@ class TestTareaManager(unittest.TestCase):
         
         with self.assertRaises(ValueError):
             manager.crear_tarea("Tarea", prioridad="")
+    def test_crear_tarea_con_fecha_limite(self):
+        """Test: Crear tarea con fecha límite."""
+        manager = TareaManager()
+        tarea = manager.crear_tarea("Tarea con fecha", fecha_limite="2026-12-31")
+        
+        self.assertEqual(tarea["titulo"], "Tarea con fecha")
+        self.assertEqual(tarea["fecha_limite"], "2026-12-31")
+        self.assertFalse(tarea["completa"])
+        self.assertIn("id", tarea)
+    
+    def test_crear_tarea_sin_fecha_limite(self):
+        """Test: Crear tarea sin fecha límite (None)."""
+        manager = TareaManager()
+        tarea = manager.crear_tarea("Tarea sin fecha")
+        
+        self.assertEqual(tarea["titulo"], "Tarea sin fecha")
+        self.assertTrue(tarea.get("fecha_limite") is None, "No debería haber fecha_limite")
+    
+    def test_crear_tarea_con_fecha_invalida(self):
+        """Test: Crear tarea con fecha límite inválida debe fallar."""
+        manager = TareaManager()
+        
+        # Formatos inválidos
+        invalid_dates = ["31-12-2026", "2026/12/31", "diciembre-2026", "2026-13-01"]
+        
+        for date in invalid_dates:
+            with self.subTest(date=date):
+                with self.assertRaises(ValueError) as ctx:
+                    manager.crear_tarea("Tarea", fecha_limite=date)
+                self.assertIn("AAAA-MM-DD", str(ctx.exception))
+    
+    def test_persistencia_fecha_limite(self):
+        """Test: Verificar que la fecha límite se persiste correctamente."""
+        manager = TareaManager()
+        manager.crear_tarea("Tarea A", fecha_limite="2026-11-15")
+        manager.crear_tarea("Tarea B", fecha_limite="2026-10-20")
+        
+        # Crear nuevo manager para cargar desde archivo
+        manager2 = TareaManager()
+        tareas = manager2.listar_tareas()
+        
+        self.assertEqual(len(tareas), 2)
+        
+        tareas_con_fecha = [t for t in tareas if t.get("fecha_limite")]
+        self.assertEqual(len(tareas_con_fecha), 2)
+        
+        titles = {t["titulo"]: t["fecha_limite"] for t in tareas_con_fecha}
+        self.assertEqual(titles["Tarea A"], "2026-11-15")
+        self.assertEqual(titles["Tarea B"], "2026-10-20")
 
 
 def run_suite():
