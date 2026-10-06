@@ -45,13 +45,23 @@ class TareaManager:
     def __init__(self):
         self.tareas = _cargar_tareas()
     
-    def crear_tarea(self, titulo: str, prioridad: str = "media") -> dict:
+    def crear_tarea(self, titulo: str, prioridad: str = "media", fecha_limite: Optional[str] = None) -> dict:
         """Crear una nueva tarea."""
         if not titulo or not titulo.strip():
             raise ValueError("El título de la tarea no puede estar vacío.")
         
         if prioridad not in ("alta", "media", "baja"):
             raise ValueError("La prioridad debe ser 'alta', 'media' o 'baja'.")
+        
+        # Validar y parsear fecha_limite si se provee
+        fecha_limite_parsed = None
+        if fecha_limite is not None:
+            try:
+                # Formato esperado: YYYY-MM-DD
+                datetime.strptime(fecha_limite, "%Y-%m-%d")
+                fecha_limite_parsed = fecha_limite
+            except ValueError:
+                raise ValueError("La fecha límite debe estar en formato AAAA-MM-DD.")
         
         tarea = {
             "id": self._generar_id(),
@@ -60,6 +70,9 @@ class TareaManager:
             "creado": datetime.now().isoformat(),
             "prioridad": prioridad
         }
+        
+        if fecha_limite_parsed is not None:
+            tarea["fecha_limite"] = fecha_limite_parsed
         self.tareas.append(tarea)
         _guardar_tareas(self.tareas)
         return tarea.copy()
@@ -134,8 +147,10 @@ def main():
         
         if opcion == "1":
             titulo = input("Ingrese el título de la tarea: ").strip()
+            fecha_limite = input("Ingrese la fecha límite (AAAA-MM-DD, opcional, enter para omitir): ").strip()
+            fecha_limite = fecha_limite if fecha_limite else None
             try:
-                tarea = manager.crear_tarea(titulo)
+                tarea = manager.crear_tarea(titulo, fecha_limite=fecha_limite)
                 print(f"Tarea creada con ID: {tarea['id']}\n{json.dumps(tarea, indent=2, ensure_ascii=False)}")
             except ValueError as e:
                 print(f"Error: {e}")
@@ -148,7 +163,8 @@ def main():
                 print(f"\n--- {len(tareas)} tarea(s) ---")
                 for t in tareas:
                     estado = "✓ COMPLETADA" if t["completa"] else "PENDIENTE"
-                    print(f"[{t['id']}] {t['titulo']} | {estado}")
+                    fecha_limite_str = f" (vence {t.get('fecha_limite', 's/f')})" if t.get('fecha_limite') else ""
+                    print(f"[{t['id']}] {t['titulo']} | {estado}{fecha_limite_str}")
         
         elif opcion == "3":
             tareas = manager.listar_tareas()
@@ -190,7 +206,8 @@ def main():
                 print(f"\n--- {len(resultados)} tarea(s) encontrada(s) ---")
                 for r in resultados:
                     estado = "✓ COMPLETADA" if r["completa"] else "PENDIENTE"
-                    print(f"[{r['id']}] {r['titulo']} | {estado}")
+                    fecha_limite_str = f" (vence {r.get('fecha_limite', 's/f')})" if r.get('fecha_limite') else ""
+                    print(f"[{r['id']}] {r['titulo']} | {estado}{fecha_limite_str}")
         
         elif opcion == "6":
             print("Saliendo...")
