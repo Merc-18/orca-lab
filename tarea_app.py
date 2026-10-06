@@ -45,16 +45,20 @@ class TareaManager:
     def __init__(self):
         self.tareas = _cargar_tareas()
     
-    def crear_tarea(self, titulo: str) -> dict:
+    def crear_tarea(self, titulo: str, prioridad: str = "media") -> dict:
         """Crear una nueva tarea."""
         if not titulo or not titulo.strip():
             raise ValueError("El título de la tarea no puede estar vacío.")
+        
+        if prioridad not in ("alta", "media", "baja"):
+            raise ValueError("La prioridad debe ser 'alta', 'media' o 'baja'.")
         
         tarea = {
             "id": self._generar_id(),
             "titulo": titulo.strip(),
             "completa": False,
-            "creado": datetime.now().isoformat()
+            "creado": datetime.now().isoformat(),
+            "prioridad": prioridad
         }
         self.tareas.append(tarea)
         _guardar_tareas(self.tareas)

@@ -140,17 +140,34 @@ class TestTareaManager(unittest.TestCase):
         with self.assertRaises(ValueError):
             manager.crear_tarea("   ")
     
-    def test_generacion_id_autoincremental(self):
-        """Test: La generación de IDs debe ser autoincremental."""
+    def test_crear_tarea_con_prioridad(self):
+        """Test: Crear tarea con prioridad explícita."""
         manager = TareaManager()
         
-        tarea1 = manager.crear_tarea("A")
-        tarea2 = manager.crear_tarea("B")
-        tarea3 = manager.crear_tarea("C")
+        alta = manager.crear_tarea("Tarea importante", prioridad="alta")
+        media = manager.crear_tarea("Tarea normal", prioridad="media")
+        baja = manager.crear_tarea("Tarea menos importante", prioridad="baja")
         
-        self.assertEqual(tarea1["id"], 1)
-        self.assertEqual(tarea2["id"], 2)
-        self.assertEqual(tarea3["id"], 3)
+        self.assertEqual(alta["prioridad"], "alta")
+        self.assertEqual(media["prioridad"], "media")
+        self.assertEqual(baja["prioridad"], "baja")
+    
+    def test_crear_tarea_sin_prioridad(self):
+        """Test: Crear tarea sin especificar prioridad (debe ser "media" por defecto)."""
+        manager = TareaManager()
+        tarea = manager.crear_tarea("Tarea sin prioridad")
+        
+        self.assertEqual(tarea["prioridad"], "media")
+    
+    def test_crear_tarea_prioridad_invalida(self):
+        """Test: Crear tarea con prioridad inválida debe fallar."""
+        manager = TareaManager()
+        
+        with self.assertRaises(ValueError):
+            manager.crear_tarea("Tarea", prioridad="urgente")
+        
+        with self.assertRaises(ValueError):
+            manager.crear_tarea("Tarea", prioridad="")
 
 
 def run_suite():
